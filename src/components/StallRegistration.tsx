@@ -4,9 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@supabase/supabase-js';
-
-console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
-console.log('Supabase Key exists:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -15,10 +13,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase environment variables');
 }
 
-const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 interface MemberInput {
   name: string;
@@ -29,6 +24,16 @@ export const StallRegistration = () => {
   const [stallNumber, setStallNumber] = useState('');
   const [members, setMembers] = useState<MemberInput[]>([{ name: '' }]);
   const [loading, setLoading] = useState(false);
+
+  if (!supabase) {
+    return (
+      <Alert variant="destructive" className="max-w-2xl mx-auto mt-6">
+        <AlertDescription>
+          Unable to connect to database. Please ensure Supabase is properly connected to your project.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   const handleAddMember = () => {
     if (members.length < 6) {
